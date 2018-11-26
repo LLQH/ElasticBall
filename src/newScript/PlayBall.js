@@ -24,9 +24,9 @@ export default class PlayBall extends Laya.Script {
     }
     onTriggerEnter(other, self, contact) {
         if (other.owner.name == "floor") {
-            console.log("速度变为0");
             this.rig.setVelocity({ x: 0, y: 0 });
             this.owner.y = other.owner.y - this.radius;
+            GameMgr.instance._canShoot = true;
             this.state = BALL_STATE.STOP;
         }
     }

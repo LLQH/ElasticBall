@@ -12,11 +12,13 @@ export default class BarrierMgr extends Laya.Script {
             { x: 311, y: 287 },
         ];
         this.effBars = [];
+        this.effBarNum = 0;
     }
     constructor() {
         super();
     }
     createBarrier() {
+        this.effBarNum = 0;
         //1.静态障碍
         this.stBarSp.visible = true;
         //2.动态障碍
@@ -32,6 +34,7 @@ export default class BarrierMgr extends Laya.Script {
             element.pos(this.pointArr[index].x, this.pointArr[index].y);
             this.owner.addChild(element);
             this.effBars.push(element);
+            this.effBarNum += 1;
         }
     }
     recoverBar() {
@@ -39,11 +42,11 @@ export default class BarrierMgr extends Laya.Script {
         for (let index = 0; index < this.effBars.length; index++) {
             this.effBars[index].removeSelf();
             if (this.effBars[index].name === "bar1") {
-                console.log("bar1");
                 Laya.Pool.recover("effbar1", this.effBars[index]);
             } else if (this.effBars[index].name === "bar2") {
                 Laya.Pool.recover("effbar2", this.effBars[index]);
             }
         }
+        this.effBars = [];
     }
 }

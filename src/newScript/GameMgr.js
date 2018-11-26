@@ -17,15 +17,21 @@ export default class GameMgr extends Laya.Script {
         this._endPoint = new Laya.Point();
         this._floorY = Laya.stage.height - 300;
         this._ballNum = 7;
-        this._difX;
-        this._difY;
+        // this._difX;
+        // this._difY;
         this._speed = 50;//合速度
-        this._dirSinY;
-        this._dirCosX;
         this._canShoot = false;
+
         this._gameUIPanel = this.owner.getChildByName("gameUIPanel");
         this._mainUIPanel = this.owner.getChildByName("mainUIPanel");
         this._gamePanel = this.owner.getChildByName("gamePanel");
+
+        this._gameUIPanel.width = Laya.stage.width;
+        this._gameUIPanel.height = Laya.stage.height;
+        this._mainUIPanel.width = Laya.stage.width;
+        this._mainUIPanel.height = Laya.stage.height;
+        this._gamePanel.width = Laya.stage.width;
+        this._gamePanel.height = Laya.stage.height;
         this._startBtn = this._mainUIPanel.getChildByName("startBtn");
         this._floor = this._gamePanel.getChildByName("floor");
         this._cir = this._gamePanel.getChildByName("gameBox");
@@ -53,6 +59,7 @@ export default class GameMgr extends Laya.Script {
     }
     restartGame() {
         this.overDialog.close();
+        this._myplayBall.removeSelf();
         Laya.Pool.recover("playBall", this._myplayBall);
         this._barMgr.recoverBar();
         this._score = 0;
@@ -63,24 +70,20 @@ export default class GameMgr extends Laya.Script {
         this._floor.y = this._floorY;
     }
     onUpdate() {
-        //console.log(this.gameState);
         if (this.gameState === GAME_STATE.START) {
 
         } else if (this.gameState === GAME_STATE.OVER) {
-            console.log("游戏结束");
+            //console.log("游戏结束");
         } else if (this.gameState === GAME_STATE.GAMEING) {
             //判断小球的状态
             //1.在中途停止
             if (this._myplayBallSc.state === BALL_STATE.STOP) {
                 if (this._myplayBall.y < (this._floor.y - 25)) {
                     this.gameOver();
-                    this.gameState = GAME_STATE.OVER;
-                } else {
-                    //判断是否还能得分
-                    this._canShoot = true;
+                } 
+                if (this._barMgr.effBarNum <= 0) {
+                    this.gameOver();
                 }
-            } else {
-
             }
         }
     }
@@ -88,9 +91,11 @@ export default class GameMgr extends Laya.Script {
     addScore(sc = 0) {
         this._score += sc;
         this.scoreTxt.text = this._score;
+        this._barMgr.effBarNum -= 1;
     }
     gameOver() {
         console.log("游戏结束");
+        this._canShoot = false;
         this.gameState = GAME_STATE.OVER;
         this.overDialog.visible = true;
         this.overDialog.show();
@@ -114,36 +119,27 @@ export default class GameMgr extends Laya.Script {
             this._cir.graphics.drawCircle(this._startPoint.x + this._difX * i, this._startPoint.y + this._difY * i, 5, "#ffffff");
         }
         if (Laya.stage.mouseY > this._startPoint.y) {
-            this._canShoot = false;
             this._cir.graphics.clear();
-        } else {
-
         }
-        console.log(this._canShoot);
     }
     onStageMouseUp(e) {
         if (!this._canShoot) return;
-        if (this._canShoot) {
-            console.log("发射："+this._canShoot);
-            this._canShoot = false;
-            this._cir.graphics.clear();
-            e.stopPropagation();
+        if (Laya.stage.mouseY > this._startPoint.y) return;
+        this._canShoot = false;
+        this._cir.graphics.clear();
+        e.stopPropagation();
 
-            this._myplayBallSc.changeBallState(BALL_STATE.MOVING);
-            let rig = this._myplayBall.getComponent(Laya.RigidBody);
-            //确定方向
-            this._dirCosX = this._difX / Math.sqrt(this._difX ** 2 + this._difY ** 2);
-            this._dirSinY = this._difY / Math.sqrt(this._difX ** 2 + this._difY ** 2);
-            let tarX = Math.trunc(this._speed * this._dirCosX);
-            let tarY = Math.trunc(this._speed * this._dirSinY);
+        this._myplayBallSc.changeBallState(BALL_STATE.MOVING);
+        let rig = this._myplayBall.getComponent(Laya.RigidBody);
+        //确定方向
 
-            const speed = {
-                x: (Laya.stage.mouseX - this._myplayBall.x) / (Laya.stage.mouseY - this._myplayBall.y),
-                y: 1
-            }
-            const fixRate = Math.sqrt(Math.pow(speed.x, 2) + Math.pow(speed.y, 2)) / Math.sqrt(Math.pow(Laya.stage.width, 2) + Math.pow(Laya.stage.height, 2)) * 100;
-            rig.setVelocity({ x: -speed.x / fixRate * 2, y: -speed.y / fixRate * 2 });
+        const speed = {
+            x: (Laya.stage.mouseX - this._myplayBall.x) / (Laya.stage.mouseY - this._myplayBall.y),
+            y: 1
         }
+        const fixRate = Math.sqrt(Math.pow(speed.x, 2) + Math.pow(speed.y, 2)) / Math.sqrt(Math.pow(Laya.stage.width, 2) + Math.pow(Laya.stage.height, 2)) * 100;
 
+        rig.setVelocity({ x: -speed.x / fixRate * 2, y: -speed.y / fixRate * 2 });
+        //rig.setVelocity({ x: -speed.x , y: -speed.y});
     }
 }

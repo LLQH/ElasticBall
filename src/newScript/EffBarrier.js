@@ -5,9 +5,7 @@ export default class DropBox extends Laya.Script {
         this._rig = this.owner.getComponent(Laya.RigidBody);
     }
     onTriggerEnter(other, self, contact) {
-        console.log("发生碰撞");
         if (other.owner.name === "playBall") {
-            console.log("加分减分");
             let tempSc = parseInt(this.owner.parent.getChildByName("score").text);
             GameMgr.instance.addScore(tempSc);
             Laya.SoundManager.playSound("sound/hit.wav");
