@@ -31,7 +31,7 @@ GameConfig.alignH = "left";
 GameConfig.startScene = "game/MainScene.scene";
 GameConfig.sceneRoot = "";
 GameConfig.debug = false;
-GameConfig.stat = true;
+GameConfig.stat = false;
 GameConfig.physicsDebug = false;
 GameConfig.exportSceneToJson = true;
 
